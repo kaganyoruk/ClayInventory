@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #1e1e1e;
+      border-radius: 12px;
+      padding: 20px;
+      width: 95%;
+      max-width: 1000px;
+      box-shadow: 0 0 20px rgba(255, 165, 0, 0.2);
+      position: relative;
+    }
+
+    h1 {
+      color: #ffa500;
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: flex-start;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      gap: 5px;
+      scrollbar-width: thin;
+    }
+    .tab {
+      flex: 0 0 auto;
+      padding: 10px 15px;
+      background-color: #2b2b2b;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .tab.active {
+      background-color: #ffa500;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .table-container { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      min-width: 400px;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+    th {
+      background-color: #2b2b2b;
+      color: #ffa500;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 5px;
+      border-radius: 6px;
+      border: 1px solid #555;
+      background-color: #2b2b2b;
+      color: #f0f0f0;
+      text-align: center;
+      font-size: 14px;
+      outline: none;
+    }
+    button {
+      background-color: #ffa500;
+      color: #000;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 2px;
+      font-size: 12px;
+    }
+    button:hover { background-color: #ffb733; }
+
+    .reset-all {
+      display: block;
+      margin: 15px auto;
+      background-color: #ff4444;
+      color: #fff;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .reset-all:hover { background-color: #ff6666; }
+
+    .note {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .logo-top-left {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 200px;
+    }
+    .logo-bottom-right {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      width: 80px;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      h1 { font-size: 20px; }
+      th, td { font-size: 12px; padding: 6px; }
+      .tab { font-size: 12px; padding: 8px; }
+      .logo-top-left { width: 150px; }
+      .logo-bottom-right { width: 60px; }
+    }
+  </style>
+</head>
+<body>
+  <img src="Metu Logoo2.png" alt="METU Logo" class="logo logo-top-left" />
+  <img src="Metu Logoo.png" alt="METU Logo 2" class="logo logo-bottom-right" />
+
+  <div class="container">
+    <h1>Stock Tracker</h1>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('clay-tab')">Clay</button>
+      <button class="tab" onclick="showTab('clinker-tab')">Clinker</button>
+      <button class="tab" onclick="showTab('limestone-tab')">Limestone</button>
+      <button class="tab" onclick="showTab('gypsum-tab')">Gypsum</button>
+      <button class="tab" onclick="showTab('chart-tab')">Chart</button>
+    </div>
+
+    <!-- Clay -->
+    <div id="clay-tab" class="tab-content active">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Temp \ Time</th><th>0.5h</th><th>1h</th><th>2h</th></tr>
+          </thead>
+          <tbody id="clay-table"></tbody>
+        </table>
+      </div>
+      <button class="reset-all" onclick="resetClay()">Reset Clay</button>
+    </div>
+
+    <!-- Clinker -->
+    <div id="clinker-tab" class="tab-content">
+      <div class="table-container">
+        <table>
+          <thead><tr><th>Clinker</th><th>Fine (g)</th></tr></thead>
+          <tbody>
+            <tr><td>Total</td><td><input type="number" id="clinker-fine" placeholder="g"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="reset-all" onclick="resetSingle('clinkerFine')">Reset Clinker</button>
+    </div>
+
+    <!-- Limestone -->
+    <div id="limestone-tab" class="tab-content">
+      <div class="table-container">
+        <table>
+          <thead><tr><th>Limestone</th><th>Fine (g)</th></tr></thead>
+          <tbody>
+            <tr><td>Total</td><td><input type="number" id="limestone-fine" placeholder="g"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="reset-all" onclick="resetSingle('limestoneFine')">Reset Limestone</button>
+    </div>
+
+    <!-- Gypsum -->
+    <div id="gypsum-tab" class="tab-content">
+      <div class="table-container">
+        <table>
+          <thead><tr><th>Gypsum</th><th>Fine (g)</th></tr></thead>
+          <tbody>
+            <tr><td>Total</td><td><input type="number" id="gypsum-fine" placeholder="g"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="reset-all" onclick="resetSingle('gypsumFine')">Reset Gypsum</button>
+    </div>
+
+    <!-- Chart -->
+    <div id="chart-tab" class="tab-content">
+      <canvas id="stockChart"></canvas>
+    </div>
+
+    <div class="note">Track material stocks. Data saved locally.</div>
+  </div>
+
+  <script>
+    const temps = [550, 600, 650, 700, 750, 800];
+    const times = ["0.5h", "1h", "2h"];
+    const clayTable = document.getElementById("clay-table");
+
+    let clayData = JSON.parse(localStorage.getItem("clayData")) || {};
+    let clinkerFine = JSON.parse(localStorage.getItem("clinkerFine")) || 0;
+    let limestoneFine = JSON.parse(localStorage.getItem("limestoneFine")) || 0;
+    let gypsumFine = JSON.parse(localStorage.getItem("gypsumFine")) || 0;
+
+    // Build Clay Table
+    temps.forEach(temp => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${temp}°C</td>`;
+      times.forEach(time => {
+        const key = `${temp}_${time}`;
+        if (!clayData[key]) clayData[key] = 0;
+
+        const cell = document.createElement("td");
+        const totalSpan = document.createElement("span");
+        totalSpan.textContent = clayData[key];
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.placeholder = "g";
+
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+";
+        addBtn.onclick = () => { clayData[key] += Number(input.value)||0; saveAll(); input.value=""; totalSpan.textContent=clayData[key]; };
+
+        const subBtn = document.createElement("button");
+        subBtn.textContent = "-";
+        subBtn.onclick = () => { clayData[key] -= Number(input.value)||0; if(clayData[key]<0) clayData[key]=0; saveAll(); input.value=""; totalSpan.textContent=clayData[key]; };
+
+        const resetBtn = document.createElement("button");
+        resetBtn.textContent = "Reset";
+        resetBtn.onclick = () => { clayData[key]=0; saveAll(); totalSpan.textContent=0; };
+
+        cell.append(totalSpan, document.createElement("br"), input, document.createElement("br"), addBtn, subBtn, resetBtn);
+        row.appendChild(cell);
+      });
+      clayTable.appendChild(row);
+    });
+
+    // Inputs for single materials
+    document.getElementById("clinker-fine").value = clinkerFine;
+    document.getElementById("limestone-fine").value = limestoneFine;
+    document.getElementById("gypsum-fine").value = gypsumFine;
+
+    ["clinker-fine","limestone-fine","gypsum-fine"].forEach(id=>{
+      document.getElementById(id).addEventListener("input",()=>{
+        clinkerFine = Number(document.getElementById("clinker-fine").value)||0;
+        limestoneFine = Number(document.getElementById("limestone-fine").value)||0;
+        gypsumFine = Number(document.getElementById("gypsum-fine").value)||0;
+        saveAll();
+      });
+    });
+
+    function saveAll() {
+      localStorage.setItem("clayData", JSON.stringify(clayData));
+      localStorage.setItem("clinkerFine", clinkerFine);
+      localStorage.setItem("limestoneFine", limestoneFine);
+      localStorage.setItem("gypsumFine", gypsumFine);
+      updateChart();
+    }
+
+    function resetClay() {
+      if(confirm("Reset Clay?")){
+        clayData = {}; temps.forEach(t=>times.forEach(time=>clayData[`${t}_${time}`]=0)); saveAll(); location.reload();
+      }
+    }
+    function resetSingle(key){
+      if(confirm(`Reset ${key}?`)){
+        if(key==="clinkerFine") clinkerFine=0;
+        if(key==="limestoneFine") limestoneFine=0;
+        if(key==="gypsumFine") gypsumFine=0;
+        saveAll(); location.reload();
+      }
+    }
+
+    // Chart
+    const ctx = document.getElementById("stockChart").getContext("2d");
+    const stockChart = new Chart(ctx, {
+      type: "bar",
+      data: { labels: [], datasets: [] },
+      options: {
+        responsive:true,
+        plugins:{ legend:{ labels:{ color:"#f0f0f0" } } },
+        scales:{ x:{ ticks:{ color:"#f0f0f0" } }, y:{ ticks:{ color:"#f0f0f0" } } }
+      }
+    });
+
+    function updateChart(){
+      const labels=[], clayValues=[];
+      temps.forEach(t=>times.forEach(time=>{
+        labels.push(`${t}°C-${time}`);
+        clayValues.push(clayData[`${t}_${time}`]||0);
+      }));
+
+      stockChart.data.labels = [...labels,"Clinker Fine","Limestone Fine","Gypsum Fine"];
+      stockChart.data.datasets = [
+        {label:"Clay (g)",data:[...clayValues,0,0,0],backgroundColor:"#ffa500"},
+        {label:"Clinker (g)",data:[...Array(clayValues.length).fill(0),clinkerFine,0,0],backgroundColor:"#ff4500"},
+        {label:"Limestone (g)",data:[...Array(clayValues.length).fill(0),0,limestoneFine,0],backgroundColor:"#00ced1"},
+        {label:"Gypsum (g)",data:[...Array(clayValues.length).fill(0),0,0,gypsumFine],backgroundColor:"#9370db"}
+      ];
+      stockChart.update();
+    }
+
+    updateChart();
+
+    function showTab(tabId) {
+      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+      document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add("active");
+      document.getElementById(tabId).classList.add("active");
+    }
+  </script>
+</body>
+</html>
